@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trufflehog Intelligence Dashboard</title><link rel="stylesheet" href="ui.css"></head>
+<body class="dashboard-body">
+<div class="shell">
+  <aside class="sidebar">
+    <header class="brand"><img src="icon48.png" alt=""><div><strong>Trufflehog <span>Intelligence</span></strong><small>Local Inspector v7.13</small></div></header>
+    <div class="sidebar-label">WORKSPACES</div>
+    <div class="workspace-switch" role="group" aria-label="Investigation workspace" id="workspaceSwitch"></div>
+    <div class="sidebar-label" id="moduleHeading">MODULES</div>
+    <nav id="nav" aria-label="Inspection categories">
+      <button data-workspace="vault" class="nav-item" data-view="site-relations"><span>⇋</span> Cross-site host roles</button>
+      <button data-workspace="network" class="nav-item" data-view="workflow-chains"><span>⇢</span> Download workflows</button>
+      <button data-workspace="overview" class="nav-item" data-view="workflow-coverage"><span>▣</span> Workflow coverage</button>
+      <button data-workspace="network" class="nav-item" data-view="download-traces"><span>↓</span> Download telemetry</button>
+      <button data-workspace="network" class="nav-item" data-view="aws-dam"><span>☁</span> AWS DAM ingestion</button>
+      <button data-workspace="network" class="nav-item" data-view="frames-workers"><span>▣</span> Frames &amp; workers</button>
+      <button data-workspace="vault" class="nav-item" data-view="explorer"><span>◎</span> Cross-archive explorer</button>
+      <button data-workspace="overview" class="nav-item" data-view="capture-repair"><span>🛠</span> Capture repair guide</button>
+      <button data-workspace="overview" class="nav-item" data-view="har-coverage"><span>▧</span> Independent HAR coverage</button>
+      <button data-workspace="overview" class="nav-item" data-view="local-benchmark"><span>⚑</span> Local capture benchmark</button>
+      <button data-workspace="overview" class="nav-item" data-view="acceptance"><span>☑</span> Capture acceptance</button>
+      <button data-workspace="overview" class="nav-item" data-view="diagnostics"><span>▤</span> Capture diagnostics</button>
+      <button data-workspace="overview" class="nav-item" data-view="discovery-pulse"><span>✧</span> Discovery pulse</button>
+      <button data-workspace="overview" class="nav-item" data-view="capture-audit"><span>✓</span> Evidence quality audit</button>
+      <button data-workspace="security" class="nav-item" data-view="exposure-history"><span>↗</span> Exposure history</button>
+      <button data-workspace="security" class="nav-item" data-view="vault-search"><span>⌕</span> Archived findings search</button>
+      <button data-workspace="vault" class="nav-item" data-view="replay"><span>◷</span> Timeline replay</button>
+      <button data-workspace="vault" class="nav-item" data-view="case-compare"><span>≠</span> Case change review</button>
+      <button data-workspace="vault" class="nav-item" data-view="case-dossier"><span>▤</span> Investigation dossier</button>
+      <button data-workspace="vault" class="nav-item" data-view="vault"><span>▣</span> Evidence vault</button>
+      <button data-workspace="overview" class="nav-item selected" data-view="overview"><span>◫</span> Overview</button>
+      <button data-workspace="security" class="nav-item" data-view="dam-security"><span>⚑</span> DAM security review</button>
+      <button data-workspace="security" class="nav-item" data-view="evidence-synthesis"><span>⊕</span> Evidence-weighted review</button>
+      <button data-workspace="security" class="nav-item" data-view="workflow-pattern">≋ Observed workflow patterns</button>
+      <button data-workspace="security" class="nav-item" data-view="compare-readiness"><span>☷</span> Comparison readiness</button>
+      <button data-workspace="security" class="nav-item" data-view="policy-drift"><span>≠</span> DAM policy comparison</button>
+      <button data-workspace="security" class="nav-item" data-view="dam-review-matrix"><span>☷</span> DAM security matrix</button>
+      <button data-workspace="security" class="nav-item" data-view="dam-risk"><span>◈</span> DAM risk intelligence</button>
+      <button data-workspace="security" class="nav-item" data-view="dam-access"><span>◉</span> DAM access states</button>
+      <button data-workspace="images" class="nav-item" data-view="dam-specialists"><span>◉</span> DAM specialist profiles</button>
+      <button data-workspace="images" class="nav-item" data-view="platforms"><span>⌘</span> DAM / CMS platforms</button>
+      <button data-workspace="images" class="nav-item" data-view="dam-history"><span>≠</span> DAM change history</button>
+      <button data-workspace="images" class="nav-item" data-view="profile-editor"><span>⚙</span> Custom DAM profiles</button>
+      <button data-workspace="images" class="nav-item" data-view="lineage"><span>◇</span> Asset lineage</button>
+      <button data-workspace="images" class="nav-item" data-view="viewers"><span>⊞</span> Specialist viewers</button>
+      <button data-workspace="images" class="nav-item" data-view="viewer-manifests"><span>◩</span> Tile manifests</button>
+      <button data-workspace="images" class="nav-item" data-view="delivery"><span>⇢</span> Delivery pipeline</button>
+      <button data-workspace="images" class="nav-item" data-view="cdn-policy"><span>▥</span> CDN delivery policies</button>
+      <button data-workspace="network" class="nav-item" data-view="network"><span>⇄</span> Network</button>
+      <button data-workspace="network" class="nav-item" data-view="generic-intelligence"><span>◎</span> Universal traffic anatomy</button>
+      <button data-workspace="network" class="nav-item" data-view="generic-sequence"><span>↝</span> Traffic transitions & lifecycles</button>
+      <button data-workspace="network" class="nav-item" data-view="generic-relationships"><span>≋</span> Relationship confidence</button>
+      <button data-workspace="security" class="nav-item" data-view="universal-boundaries"><span>▣</span> Universal delivery boundaries</button>
+      <button data-workspace="network" class="nav-item" data-view="product-assets"><span>◫</span> Product &amp; Asset Relationships</button>
+      <button data-workspace="network" class="nav-item" data-view="hybrid-workflow"><span>↣</span> Hybrid workflow stages</button>
+      <button data-workspace="network" class="nav-item" data-view="asset-licensing"><span>◈</span> Asset Licensing &amp; Delivery Intelligence</button>
+      <button data-workspace="network" class="nav-item" data-view="api"><span>◇</span> API endpoints</button>
+      <button data-workspace="network" class="nav-item" data-view="upload-protocols"><span>⇡</span> Upload protocols</button>
+      <button data-workspace="network" class="nav-item" data-view="api-schema-diff"><span>≠</span> API schema changes</button>
+      <button data-workspace="network" class="nav-item" data-view="responses"><span>{ }</span> JSON shapes</button>
+      <button data-workspace="gallery" class="nav-item" data-view="gallery"><span>▦</span> Gallery activity</button>
+      <button data-workspace="gallery" class="nav-item" data-view="collections"><span>♢</span> Collections & duplicates</button>
+      <button data-workspace="gallery" class="nav-item" data-view="coverage"><span>▦</span> Coverage</button>
+      <button data-workspace="overview" class="nav-item" data-view="status"><span>◉</span> Status</button>
+      <button data-workspace="images" class="nav-item" data-view="images"><span>▧</span> Images</button>
+      <button data-workspace="images" class="nav-item" data-view="quality-ledger"><span>◇</span> Asset quality ledger</button>
+      <button data-workspace="images" class="nav-item" data-view="quality-transfers"><span>↧</span> Transfer integrity</button>
+      <button data-workspace="images" class="nav-item" data-view="variants"><span>▤</span> Variant families</button>
+      <button data-workspace="images" class="nav-item" data-view="matches"><span>◎</span> Cross-CDN matches</button>
+      <button data-workspace="images" class="nav-item" data-view="visual"><span>◈</span> Visual candidates</button>
+      <button data-workspace="images" class="nav-item" data-view="meta-rel"><span>♢</span> Metadata relationships</button>
+      <button data-workspace="images" class="nav-item" data-view="variant-matrix"><span>▦</span> CDN variant matrix</button>
+      <button data-workspace="security" class="nav-item" data-view="security-intelligence"><span>⚑</span> Security Intelligence</button>
+      <button data-workspace="security" class="nav-item" data-view="import-preflight"><span>♧</span> Import privacy preflight</button>
+      <button data-workspace="security" class="nav-item" data-view="secrets"><span>♙</span> Masked indicators</button>
+      <button data-workspace="overview" class="nav-item" data-view="resource-scans"><span>▣</span> Auto-scanned files</button>
+      <button data-workspace="security" class="nav-item" data-view="js-history"><span>≠</span> JavaScript changes</button>
+      <button data-workspace="network" class="nav-item" data-view="search-intel"><span>⌕</span> Search &amp; interactions</button>
+      <button data-workspace="network" class="nav-item" data-view="maps"><span>⌁</span> Source maps</button>
+      <button data-workspace="network" class="nav-item" data-view="graphql"><span>◈</span> GraphQL</button>
+      <button data-workspace="network" class="nav-item" data-view="config"><span>⚙</span> Public config</button>
+      <button data-workspace="network" class="nav-item" data-view="graph"><span>☷</span> Relationship graph</button>
+      <button data-workspace="network" class="nav-item" data-view="infra"><span>⬡</span> Infrastructure</button>
+      <button data-workspace="network" class="nav-item" data-view="integration-boundaries"><span>⇢</span> Integration boundaries</button>
+    </nav>
+    <div class="sidebar-bottom">Automatic capture on permitted sites<br>Pause globally from the popup.<br>Nothing uploaded or shared.<br><span id="version">Manifest V3</span></div>
+  </aside>
+  <main class="workspace">
+    <div class="topbar"><div><span class="eyebrow">CURRENT INVESTIGATION</span><h1 id="pageTitle">Overview</h1><p id="origin" class="muted">Loading capture…</p></div><div class="status-pill" id="statusPill">● Not recording</div></div>
+    <div class="recipe-bar"><label for="profile">Investigation recipe</label><select id="profile" aria-label="Investigation recipe"><option value="generic">Universal Research</option><option value="gallery">Gallery Coverage</option><option value="dam">DAM / Capture</option><option value="cdn">CDN &amp; Image Delivery</option><option value="archive">Cross-Archive Comparison</option></select><span id="recipeDescription">Focuses relevant dashboard sections; does not initiate requests or change capture permissions.</span></div>
+    <div class="toolbar"><button id="liveBack" class="btn alt" hidden>← Live capture</button><button id="start" class="btn primary">● Start capture</button><button id="stop" class="btn danger" hidden>■ Stop</button><button id="scan" class="btn alt">↻ Refresh page inventory</button><button id="scripts" class="btn alt">Analyse linked JS</button><button id="offlineInspector" class="btn alt">Offline HAR / files ↗</button><button id="ack" class="btn alt" title="Clear the red alert badge after reviewing findings" hidden>Mark alerts reviewed</button><button id="maps" class="btn alt" title="Explicitly fetch public source maps already referenced in inspected scripts, without credentials">Inspect referenced maps</button><button id="downloadToggle" class="btn alt" title="Opt-in observation of request structure, signature schemes, W3C trace indicators, CDN headers and download outcomes; no credentials or trace IDs retained">Enable download observer</button><button id="responseToggle" class="btn alt" title="Requires Chrome DevTools open on the original website">Enable JSON shapes + licensing</button><button id="viewerToggle" class="btn alt" title="Opt-in, only already-received public IIIF/DZI/Zoomify manifests with DevTools open">Inspect viewer manifests</button><button id="visualToggle" class="btn alt" type="button">Enable visual fingerprints</button><button id="metadataToggle" class="btn alt" title="Opt-in: hash EXIF/IPTC/XMP/ICC metadata blocks without retaining their values; also enables image-byte verification">Fingerprint image metadata</button><button id="imageToggle" class="btn alt" title="Opt-in verification of already-received image bytes; requires DevTools open">Verify image bytes</button><span class="grow"></span><button id="json" class="btn alt">Export JSON</button><button id="csv" class="btn alt">Export CSV</button><button id="clear" class="btn ghost">Clear</button></div>
+    <section class="cards" id="cards"></section>
+    <section class="content-section"><div class="section-head"><div><h2 id="sectionTitle">Session overview</h2><p class="muted" id="sectionInfo">Observed activity and discovered relationships</p></div><label class="search"><span>⌕</span><input id="search" type="search" placeholder="Search current view" aria-label="Search current view"></label></div>
+      <div id="content" class="content"></div>
+    </section>
+    <div class="footer"><span id="message" role="status">Capture runs only while enabled for the selected site and tab.</span><span>Local-only · Redacted URLs · Automatic DevTools scanning of loaded files · masked indicators · no source content stored</span></div>
+  </main>
+</div><script src="security_intelligence.js"></script><script src="asset_licensing_intel.js"></script><script src="product_asset_intel.js"></script><script src="import_privacy_preflight.js"></script><script src="hybrid_workflow_intel.js"></script><script src="generic_intelligence.js"></script><script src="generic_sequence.js"></script><script src="generic_relationship_confidence.js"></script><script src="generic_boundary_review.js"></script><script src="har_cache_revalidation.js"></script><script src="har_image_negotiation.js"></script><script src="scanner.js"></script><script src="image_intel.js"></script><script src="dam_intel.js"></script><script src="dam_security.js"></script><script src="dam_risk_intel.js"></script><script src="relationship_graph.js"></script><script src="lineage_intel.js"></script><script src="viewer_intel.js"></script><script src="gallery_intel.js"></script><script src="visual_intel.js"></script><script src="cross_archive.js"></script><script src="vault_professional.js"></script><script src="capture_health.js"></script><script src="acceptance_intel.js"></script><script src="script_changes.js"></script><script src="custom_profiles.js"></script><script src="dam_history.js"></script><script src="capture_audit.js"></script><script src="discovery_pulse.js"></script><script src="frame_worker_intel.js"></script><script src="site_relationships.js"></script><script src="dam_delivery_policy.js"></script><script src="dam_telemetry.js"></script><script src="aws_dam_intel.js"></script><script src="download_observer.js"></script><script src="workflow_intel.js"></script><script src="upload_api_intel.js"></script><script src="asset_quality.js"></script><script src="dam_specialists.js"></script><script src="case_intel.js"></script><script src="case_crypto.js"></script><script src="case_compare.js"></script><script src="lab_acceptance.js"></script><script src="capture_repair.js"></script><script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script></body></html>
