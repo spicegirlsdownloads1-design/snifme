@@ -89,13 +89,17 @@ Open **Dashboard → Security → Security Intelligence** while visiting an auth
 - sensitive POST/PUT/PATCH/DELETE endpoint shapes and a fixed vocabulary of form **field names only**;
 - session-like cookie attribute problems where the `Set-Cookie` header is available.
 
-The **Offline HAR security review** control reads a user-selected HAR locally (maximum 12 MB and the first 3,000 entries), displays classified counts, and allows a safe JSON export. Neither raw HAR traffic, query values, credential-bearing headers nor POST contents are persisted by the new engine. Existing JavaScript secret indicators and import privacy preflight remain separate.
+The **Offline HAR security review** control reads a user-selected HAR locally (maximum 12 MB and the first 3,000 entries), displays classified counts, and allows a safe JSON export. It examines credential-named headers, redirect query names and embedded textual request/response bodies in bounded memory. Neither raw HAR traffic, query values, credential-bearing headers, POST contents nor response bodies are persisted. Existing JavaScript secret indicators and import privacy preflight remain separate.
 
 **Important limits:** Passive observation cannot validate authorization, BOLA/IDOR, SSRF, CSRF, code execution, token privileges, file access, payment entitlement, or exploitation of any CVE. CORS wildcard with credentials is normally *blocked by browsers*, rather than a proven data exposure. Allowlisted SSO redirects and publishable API keys can be legitimate. Chrome may not expose `Referer`, `Cookie`, or `Set-Cookie` to `webRequest` without the optional `extraHeaders` mode; this release does **not** enable that costly permission mode globally. The security engine requires the same permitted HTTP(S) site capture as the existing extension. No active probes, payloads, bypasses, replays or automatic credential tests are added.
 
 To test, use `run.bat` option 2 and the local synthetic fixture. It adds harmless CORS, URL marker and form-field requests; examine **Security Intelligence** after clicking Run all test requests. For offline review, select `tests/security-intelligence-synthetic.har`. The synthetic fixtures use `.invalid` domains and non-working placeholder tokens.
 
-**Not yet included:** encrypted raw evidence vault, component/version-to-CVE matching, true response-body secret scanning beyond the existing inspector, full `extraHeaders` coverage, authentication anomaly aggregation, and real Windows Chrome acceptance. These require separate implementation and testing.
+**Not yet included:** encrypted raw evidence vault, component/version-to-CVE matching, response bodies unavailable to the existing DevTools inspector, full `extraHeaders` coverage, authentication anomaly aggregation, and real Windows Chrome acceptance. These require separate implementation and testing.
+
+## v7.20 — Passive secret-exposure coverage (NEW)
+
+The existing opt-in DevTools inspector now recognises additional credential formats in already-loaded JavaScript, HTML, JSON and textual API responses. The web-request layer records only credential header names and redirect/query classifications. Local HAR review can derive redacted findings from embedded textual request and response bodies, including API, GraphQL and telemetry payloads. None of these paths replay requests, validate credentials, fetch unobserved resources or retain matched values/source excerpts. See `RELEASE-v7.20.md` for exact limits and validation instructions.
 
 Source references: OWASP API Top 10 and REST/Logging cheat sheets, Chrome `webRequest` and storage documentation, and cloud providers' signed URL guidance. See `RELEASE-v7.18.md` for links and scope.
 

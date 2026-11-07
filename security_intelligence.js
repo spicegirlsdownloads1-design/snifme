@@ -17,6 +17,11 @@ const META={
  MUTATION_CONTEXT:['Sensitive state-changing API operation observed','info','A state-changing request targeted an authentication, admin, account, upload or licensing-like path. No CSRF or authorisation weakness has been established.','Review authentication, CSRF and object-level authorisation using authorised application tests.'],
  FORM_FIELD_CONTEXT:['Sensitive POST form field categories observed','info','Only recognised form-field names were observed. No values were read or retained; missing protection or a vulnerability cannot be concluded.','Review the endpoint protection and confirm sensitive values are protected in transit and logs.'],
  COOKIE_FLAGS:['Session-like cookie security flags merit review','review','Cookie attribute metadata suggests a missing protective flag or browser-rejected SameSite combination. Actual risk depends on cookie purpose and environment.','Use Secure on HTTPS session cookies, HttpOnly where script access is unnecessary, and an appropriate SameSite policy.']
+ ,CREDENTIAL_REQUEST_HEADER:['Credential-bearing request header observed','review','A credential header name with a non-placeholder value was observed. The value, validity and privileges were not retained or tested.','Confirm the credential is required, narrowly scoped and excluded from logs and third-party requests.']
+ ,CREDENTIAL_RESPONSE_HEADER:['Credential-like response header observed','high-review','A response exposed a credential-named header with a non-placeholder value. The value was not retained or tested.','Remove reusable credentials from responses and rotate the affected credential if exposure is confirmed.']
+ ,SECRET_RESPONSE_BODY:['Credential indicator in response content','high-review','A bounded, already-captured response body contained a credential-shaped indicator. No value or surrounding source text was retained.','Remove secrets from client-visible responses or bundles and rotate any confirmed credential.']
+ ,SECRET_REQUEST_BODY:['Credential indicator in request content','review','A locally imported request body contained a credential-shaped indicator. No value or surrounding source text was retained.','Keep credentials out of telemetry and logs; prefer protected authorization channels and redact captures before sharing.']
+ ,REDIRECT_SECRET:['Credential-like value in redirect target','high-review','An observed redirect target contained a credential-like query parameter. The target value was not retained and credential validity is unknown.','Remove reusable credentials from redirect URLs and review browser history, referrer and logging exposure.']
 };
 const rule=(id,ctx,markers=[],extra={})=>{
  const [title,severity,limit,advice]=META[id];
@@ -46,6 +51,22 @@ const publicKeyNames=new Set(['api_key','apikey','x_api_key','key']);
 const signedMarkers=new Set(['x-amz-signature','x-goog-signature','sig','signature','cloudfront-signature']);
 const norm=x=>String(x||'').toLowerCase().replace(/-/g,'_');
 const nonPlaceholder=x=>typeof x==='string'&&x.length>=8&&!/^(?:0+|x+|test|demo|example|placeholder|changeme|undefined|null)$/i.test(x);
+const credentialHeaderNames=new Set(['authorization','proxy-authorization','x-api-key','api-key','x-auth-token','x-access-token','x-amz-security-token']);
+const BODY_PATTERNS=[
+ ['aws-access-key',/\b(?:AKIA|ASIA)[0-9A-Z]{16}\b/g],['github-token',/\bgh[pousr]_[A-Za-z0-9_]{20,}\b/g],
+ ['gitlab-token',/\bglpat-[A-Za-z0-9_-]{18,}\b/g],['slack-token',/\bxox[bapors]-[A-Za-z0-9-]{20,}\b/g],
+ ['stripe-secret-key',/\b(?:sk|rk)_(?:test|live)_[A-Za-z0-9]{16,}\b/g],['sendgrid-key',/\bSG\.[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{20,}\b/g],
+ ['npm-token',/\bnpm_[A-Za-z0-9]{30,}\b/g],['private-key',/-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/g],
+ ['credential-uri',/\b(?:https?|postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis):\/\/[^\s:@/]{1,80}:[^\s@/]{8,180}@/gi]
+];
+const NAMED_SECRET=/\b(api[_-]?(?:secret|key)|client[_-]?secret|private[_-]?key|auth[_-]?token|access[_-]?token|refresh[_-]?token|database[_-]?url)\b["']?\s*[:=]\s*["']([^"'\s]{16,180})["']/gi;
+function textIndicators(text,maxBytes=2*1024*1024){
+ if(typeof text!=='string'||text.length>maxBytes)return {eligible:false,indicators:[],reason:'body exceeds analysis cap'};
+ const indicators=[],seen=new Set(),add=x=>{if(!seen.has(x)&&indicators.length<80){seen.add(x);indicators.push(x);}};
+ for(const [name,re] of BODY_PATTERNS){re.lastIndex=0;let m,n=0;while((m=re.exec(text))&&n++<20)add(name);}
+ NAMED_SECRET.lastIndex=0;let m,n=0;while((m=NAMED_SECRET.exec(text))&&n++<30)if(nonPlaceholder(m[2]))add(norm(m[1])==='api_key'?'api-key-assignment':'named-secret-assignment');
+ return {eligible:true,indicators};
+}
 function queryInfo(url){
  try{const u=new URL(url),pairs=[...u.searchParams.entries()];
   const out={secret:[],session:[],signed:false,family:'',window:'unknown',code:[]};
@@ -111,6 +132,8 @@ function classify(stage,d){const ctx=context(stage,d);if(!ctx)return [];
   if(refOrigin&&refOrigin!==originUrl&&(r.secret.length||r.session.length||r.signed)){
    out.push(rule('REFERER_SECRET',ctx,[...r.secret,...r.session,...(r.signed?['signed-delivery']:[])],{scope:'cross-origin',classification:'observed-referer-header'}));
   }
+  const names=[];for(const [name,value] of h)if(credentialHeaderNames.has(name)&&nonPlaceholder(value))names.push(name);
+  if(names.length)out.push(rule('CREDENTIAL_REQUEST_HEADER',ctx,names,{classification:'credential-header-name-only'}));
  }
  if(stage==='response-headers'){
   const h=headers(d.responseHeaders),allow=(h.get('access-control-allow-origin')||'').trim(),cred=(h.get('access-control-allow-credentials')||'').trim().toLowerCase()==='true';
@@ -133,14 +156,23 @@ function classify(stage,d){const ctx=context(stage,d);if(!ctx)return [];
     break;
    }
   }
+  const exposed=[];for(const [name,value] of h)if(credentialHeaderNames.has(name)&&nonPlaceholder(value))exposed.push(name);
+  if(exposed.length)out.push(rule('CREDENTIAL_RESPONSE_HEADER',ctx,exposed,{classification:'credential-header-name-only'}));
  }
  if(stage==='redirect'){
   const target=String(d.redirectUrl||'');const to=origin(target),next=queryInfo(target);
+  if(to&&next.secret.length)out.push(rule('REDIRECT_SECRET',ctx,next.secret,{scope:to===originUrl?'same-origin':'cross-origin',classification:'redirect-query-name-only'}));
   if(to&&to!==originUrl&&next.code.length){
    out.push(rule('OAUTH_REDIRECT_DATA',ctx,next.code,{scope:'cross-origin',classification:'auth-callback-parameter',confidence:'exact-observation'}));
   }
  }
  return out;
+}
+function classifyBody(stage,d,text,kind='text'){
+ const ctx=context(stage,d);if(!ctx)return [];
+ const scan=textIndicators(text),ruleId=stage==='request-body'?'SECRET_REQUEST_BODY':'SECRET_RESPONSE_BODY';
+ if(!scan.eligible||!scan.indicators.length)return [];
+ return [rule(ruleId,ctx,scan.indicators,{classification:String(kind).toLowerCase().replace(/[^a-z0-9+.-]/g,'').slice(0,40)||'text',confidence:'pattern-indicator'})];
 }
 // HAR is read in-memory by the dashboard only. Never modify source or retain raw headers.
 function analyzeHar(value,maxEntries=3000){
@@ -163,6 +195,10 @@ function analyzeHar(value,maxEntries=3000){
   const base={url:req.url,method:req.method,timeStamp:at,requestId:'har-'+i,initiator:origin(originHeader),statusCode:resp.status,requestBody:{formData}};
   result.push(...classify('request',base),...classify('request-headers',{...base,requestHeaders:req.headers}));
   result.push(...classify('response-headers',{...base,responseHeaders:resp.headers}));
+  const requestText=typeof req.postData?.text==='string'?req.postData.text:'';
+  if(requestText)result.push(...classifyBody('request-body',base,requestText,req.postData?.mimeType||'text'));
+  const responseText=typeof resp.content?.text==='string'?resp.content.text:'';
+  if(responseText&&!resp.content?.encoding)result.push(...classifyBody('response-body',base,responseText,resp.content?.mimeType||'text'));
   let location=resp.redirectURL||headers(resp.headers).get('location')||'';
   if(location){try{location=new URL(location,req.url).href;}catch{location='';}}
   if(location)result.push(...classify('redirect',{...base,redirectUrl:location}));
@@ -175,6 +211,6 @@ function summarize(items){const rows=[],map=new Map();for(const r of Array.isArr
  const k=r.ruleId+'|'+r.severity+'|'+r.title,entry=map.get(k)||{ruleId:r.ruleId,title:r.title||META[r.ruleId][0],severity:r.severity||META[r.ruleId][1],count:0,confidence:r.confidence||'exact-observation'};
  entry.count++;map.set(k,entry);
 }rows.push(...map.values());return rows.sort((a,b)=>b.count-a.count||a.ruleId.localeCompare(b.ruleId));}
-root.THISecurityIntelligence={classify,analyzeHar,summarize,meta:META,version:VERSION};
+root.THISecurityIntelligence={classify,classifyBody,textIndicators,analyzeHar,summarize,meta:META,version:VERSION};
 if(typeof module!=='undefined'&&module.exports)module.exports=root.THISecurityIntelligence;
 })(typeof self!=='undefined'?self:globalThis);

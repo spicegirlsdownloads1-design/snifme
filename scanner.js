@@ -97,11 +97,17 @@
     ['SendGrid key indicator', /\bSG\.[A-Za-z0-9_-]{15,}\.[A-Za-z0-9_-]{20,}\b/g, 'possible private credential'],
     ['Mailgun key indicator', /\bkey-[0-9A-Za-z]{32}\b/g, 'possible private credential'],
     ['GitLab token indicator', /\bglpat-[A-Za-z0-9_-]{18,}\b/g, 'possible private credential'],
+    ['npm access-token indicator', /\bnpm_[A-Za-z0-9]{30,}\b/g, 'possible private credential'],
+    ['PyPI upload-token indicator', /\bpypi-AgEIcHlwaS5vcmc[A-Za-z0-9_-]{20,}\b/g, 'possible private credential'],
+    ['Hugging Face token indicator', /\bhf_[A-Za-z0-9]{30,}\b/g, 'possible private credential'],
+    ['Azure Storage connection string', /\bDefaultEndpointsProtocol=https?;AccountName=[^;\s]{3,};AccountKey=[A-Za-z0-9+/=]{20,}/g, 'possible storage account credential'],
+    ['Database credential URI', /\b(?:postgres(?:ql)?|mysql|mongodb(?:\+srv)?|redis):\/\/[^\s:@/]{1,80}:[^\s@/]{8,180}@[^\s"'`<>]{3,}/gi, 'credential-bearing connection URI'],
+    ['HTTP basic-auth URL', /\bhttps?:\/\/[^\s:@/]{1,80}:[^\s@/]{8,180}@[^\s"'`<>]{3,}/gi, 'credential embedded in URL user-info'],
     ['Slack webhook indicator', /https:\/\/hooks\.slack\.com\/services\/[A-Za-z0-9_\/-]{25,}/g, 'webhook URL may be sensitive'],
     ['Telegram bot-token indicator', /\b[0-9]{6,12}:AA[A-Za-z0-9_-]{33}\b/g, 'possible private credential'],
     ['Private key material', /-----BEGIN (?:RSA |EC |OPENSSH |DSA )?PRIVATE KEY-----/g, 'private-key header present']
   ];
-  const namedAssignment = /\b(?:api[_-]?(?:secret|key)|client[_-]?secret|private[_-]?key|auth[_-]?token|secret[_-]?key)\b\s*[:=]\s*['"]([^'"\s]{16,180})['"]/gi;
+  const namedAssignment = /\b(?:api[_-]?(?:secret|key)|client[_-]?secret|private[_-]?key|auth[_-]?token|access[_-]?token|refresh[_-]?token|secret[_-]?key|database[_-]?url)\b\s*[:=]\s*['"]([^'"\s]{16,180})['"]/gi;
   function secretIndicators(text, source, onRawIndicator) {
     const found = [], seen = new Set();
     const textToCheck = String(text || '').slice(0, 500000);
