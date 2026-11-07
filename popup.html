@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trufflehog Intelligence</title><link rel="stylesheet" href="ui.css"></head>
+<body class="popup-body"><main class="popup">
+  <header class="brand"><img src="icon48.png" alt=""><div><strong>Trufflehog <span>Intelligence</span></strong><small>Passive inspection · local only</small></div></header>
+  <div class="popup-domain" id="origin">Checking active tab…</div>
+  <p class="muted small">Automatically observes normal HTTP/HTTPS sites as navigation begins. All safe analysis switches default to on; DevTools-only analysis still needs F12. Chrome manages all-sites permission.</p>
+  <label class="small" style="display:block;margin:12px 0"><input id="autoCapture" type="checkbox" checked> Automatically capture all permitted websites (global pause)</label>
+  <div class="capture-status"><span class="dot" id="accessDot"></span><span id="accessStatus">Checking site access…</span></div>
+  <div class="capture-status"><span class="dot" id="statusDot"></span><span id="status">Not recording</span></div>
+  <div class="stack"><button id="start" class="btn primary">Start capturing this tab</button><button id="stop" class="btn alt" hidden>Stop capture</button><button id="revoke" class="btn alt" hidden>Revoke this site's access</button><button id="dashboard" class="btn alt">Open full dashboard ↗</button><button id="vault" class="btn alt">Saved investigations ↗</button><button id="offlineInspector" class="btn alt">Offline HAR &amp; file inspector ↗</button><button id="downloadObserver" class="btn alt">Authenticated download observer ↗</button><button id="crossArchive" class="btn alt">Cross-archive explorer ↗</button><button id="recover" class="btn alt">Recheck &amp; restore capture</button><button id="diagnostics" class="btn alt">Run Chrome diagnostics</button><button id="audit" class="btn alt">Evidence quality audit ↗</button><button id="acceptance" class="btn alt">Capture acceptance ↗</button><button id="selfTest" class="btn alt">Run full extension self-test</button><button id="testNotice" class="btn alt">Send test notification</button></div>
+  <label class="small" style="display:block;margin:12px 0"><input id="secretAlerts" type="checkbox" checked> Pop up for potentially sensitive secrets</label>
+  <div class="small" id="selfTestStatus" role="status" style="white-space:pre-wrap;margin:12px 0"></div><button id="copyHealth" class="btn alt" hidden>Copy diagnostic report</button><p class="small" id="alertStatus" role="status"></p><p class="small" id="healthStatus" role="status"></p><p class="small" id="diagnosticStatus" role="status"></p>
+  <p class="foot-note" id="note">Passive observation; private URLs and credential values remain excluded from reports. Some modules require DevTools open.</p>
+</main><script src="popup.js"></script></body></html>

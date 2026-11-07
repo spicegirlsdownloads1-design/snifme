@@ -1,0 +1,23 @@
+Trufflehog Intelligence v7.19.0 — independent offline verification
+Date: 2026-11-07
+
+PASS: 177/177 Node test files, including v7.19 capture-journal replay and
+      synthetic MV3 service-worker restart/migration tests.
+PASS: 84/84 root JavaScript syntax checks (node --check).
+PASS: bundled local-test-server.txt parses under Node VM.
+PASS: bundled localhost fixture starts under Node and returns HTTP 200.
+PASS: passively recorded synthetic token values absent from saved worker record.
+PASS: IndexedDB model: delta append, mutation replacement, automatic compaction
+      at 96 changes, simulated worker recreation, migration of legacy local
+      record and vault archival.
+PASS: manifest and HTML static module references exist in release directory.
+PASS: release ZIP integrity (after packaging) — see ZIP verification report.
+
+NOT VERIFIED: real Windows Chrome MV3 runtime with actual IndexedDB.
+NOT VERIFIED: graphical Chromium smoke test — headless launch stalled here.
+NOT VERIFIED: 100,000-event / ten-tab performance or real storage quota exhaustion.
+NOT IMPLEMENTED: encrypted full-fidelity raw evidence vault, automatic CDP
+response-body collection, guaranteed all-site response coverage.
+
+No third-party web targets were contacted by v7.19 tests. Fixture binds to
+127.0.0.1. No third-party probing/replay/bypass functionality was added.

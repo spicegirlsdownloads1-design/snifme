@@ -1,0 +1,25 @@
+TRUFFLEHOG INTELLIGENCE v7.18 — SECURITY INTELLIGENCE ACCEPTANCE
+================================================================
+
+OFFLINE TESTING (no sites contacted):
+1. Open Dashboard -> Security -> Security Intelligence.
+2. Choose tests/security-intelligence-synthetic.har under Offline HAR security review.
+3. Confirm these seven conditions appear: URL secret, signed URL, wildcard credentials CORS, POST form fields, state-changing operation, cross-origin OAuth redirect, cross-origin Referer leak.
+4. Confirm raw FAKE_NON_WORKING_TOKEN_1234567890 does NOT appear in the safe JSON export.
+5. Open the general Import privacy preflight for a separate category-only warning.
+
+LIVE LOCALHOST TEST (do not use unrelated websites for acceptance):
+1. Double-click run.bat -> option 2 -> http://127.0.0.1:4317/.
+2. Confirm capture is enabled in the popup; turn on site permissions if Chrome requests them.
+3. Click Run all test requests.
+4. Open the dashboard Security Intelligence view and confirm the local URL marker, CORS policy fixture and sensitive-field POST indicators.
+5. Inspect Chrome extension Errors and note any service-worker failures.
+6. Export Security Intelligence JSON; verify that fake query parameter values and POST form values are absent (only class/field labels appear).
+7. Open F12 and rerun for the *older* JSON/licensing modules; the new security conditions are metadata-only and do NOT require F12 for URL/response headers Chrome exposes.
+
+COVERAGE / LIMITATIONS:
+- Chrome webRequest without extraHeaders may not expose Referer/Set-Cookie; those conditions are best-effort only.
+- Cross-origin OAuth redirect checks are covered by offline/VM fixtures, not the localhost fixture.
+- No active authentication, authorization, CVE exploit, IDOR/BOLA, SQLi, SSRF or path-traversal tests are performed.
+- CORS wildcard+credentials is not an exploitable bypass in normal browsers.
+- Full Windows Chrome acceptance, large-capture storage stress and encrypted full-fidelity vault are still outstanding.

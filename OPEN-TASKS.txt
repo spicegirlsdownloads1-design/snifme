@@ -1,0 +1,42 @@
+Trufflehog Intelligence — Outstanding work after v7.19.0
+Date: 2026-11-06
+
+RELEASE-BLOCKING ACCEPTANCE (not verified in this environment)
+1. On Windows Chrome: extension worker startup, all-sites permission, auto-capture from main-frame navigation, global pause, resuming from paused state, F12/DevTools response-body observation, redirected and aborted requests, same-site and cross-site navigation, downloads, vault backup/import.
+2. Browser restart versus MV3 worker suspension: current pending-download checkpoint survives ordinary worker suspension through chrome.storage.session, but not a full Chrome exit. Verify behavior and show an explicit coverage warning for incomplete downloads.
+3. Multi-tab and long-session storage: benchmark write amplification and quota stress from repeated chrome.storage.local full-record rewrites; incremental IndexedDB journal implemented in v7.19; remaining: prove throughput/latency at 100k+ events and 10+ tabs, exercise real quota failures and design bounded write backpressure.
+4. Capture diagnostics: unassigned-response counts, journal mode and storage estimates added in v7.19; remaining: persistent counters across restarts, permission-denial/pause warnings, reliable loss telemetry and end-to-end benchmarks.
+
+FUTURE DEVELOPMENT
+5. Explicit, encrypted local full-fidelity evidence vault for authorised imports/research. Never silently collect plaintext passwords, cookies, session tokens or reusable signed URLs during automatic all-sites capture. Provide auditable local access control and safe sharing outputs.
+6. Dashboard simplification: start with a clear Capture Health screen, then APIs, Assets, Licensing, Downloads, Evidence, and Advanced; preserve all specialist functions, and lazy-load heavy reports.
+7. Strengthen product/media identity: add cryptographic hash correlation when the browser has legitimately observed both files; never infer original/master availability from filename or licence listing.
+8. Improve backwards-compatibility round trips: use explicit schema-version migrations and tests for group backups, older imports, invalid values, unknown fields, deduplication, truncated arrays and vault error recovery.
+9. Extend end-to-end tests to Windows Chrome 156+ or equivalent with repeatable guided local fixture; automate deterministic service-worker idle/restart and capture rollover tests where possible.
+
+NOT A FEATURE REQUEST
+- No service-specific DAM scanner dependency; all detections must remain generic and based on observed evidence.
+- No automatic endpoint probing, unauthorised access checks, replay of credentialed transactions or third-party download attempts.
+
+
+v7.18 Security Intelligence follow-up:
+- Windows live-browser acceptance for the new Security Intelligence dashboard.
+- Opt-in extraHeaders/DevTools CDP coverage and explicit limitations, never global silent deep capture.
+- Incremental event persistence, quota and loss diagnostics, 100k event stress tests.
+- Encrypted evidence vault with separate share-safe export and per-site controls.
+- Auth-flow anomaly scoring and version-to-advisory matching only with firm version evidence.
+- False-positive reviews and more near-miss synthetic fixtures for CORS/referrer/OAuth.
+
+
+AFTER v7.19 (2026-11-07)
+- Live Windows Chrome acceptance of the new IndexedDB journal, especially rapid
+  navigation, tab close, worker suspension, browser shutdown and quota pressure.
+- Versioned migration tests from real v7.18 saved sessions and interrupted writes;
+  review deletion consistency, corrupted-delta errors and operator recovery.
+- 100,000-event / multi-tab throughput measurements; measure CPU, memory, IndexedDB
+  size and storage.local write amplification. No such benchmark is claimed yet.
+- Persist coverage counters if independently useful; current unassigned counters
+  reset when the background service worker restarts.
+- Controlled encrypted evidence vault; explicitly opt-in deep response inspection;
+  advisory/CVE version matching only with reliable observed version evidence.
+- Simplify dashboard navigation and distinguish unknown / not-observed / denied.

@@ -1,0 +1,37 @@
+TRUFFLEHOG v7.16.0 — WINDOWS CHROME ACCEPTANCE
+
+[ ] Install ONE instance of v7.16.0 from extracted folder; approve Chrome's all-sites permission.
+[ ] Chrome Site access is On all sites for ordinary HTTP/HTTPS domains.
+[ ] Navigate to http://127.0.0.1:4317 after choosing run.bat option 2.
+[ ] Popup automatically reads Recording without clicking Start.
+[ ] Run all test requests; popup diagnostics show a positive request count.
+[ ] Test source downloads and observe Download Traces; network records are not proof of browser delivery.
+[ ] F12 on the fixture tab; rerun test; check Asset Licensing & Delivery Intelligence.
+[ ] Product & Asset Relationships shows the fictional product and explicit media response relationship.
+[ ] Hybrid workflow stages shows document, API, asset and download stages without inventing causality.
+[ ] Import privacy preflight: a local sample with fake Cookie and password fields produces warnings but no raw value in the dashboard.
+[ ] Inspect 7 capture flags in dashboard; default on for new captures.
+[ ] Navigate from one origin to another and confirm independent session grouping.
+[ ] Untick global auto capture; verify no further automatic recording.
+[ ] Tick it again; automatic recording resumes for permitted open tabs.
+[ ] Inspect chrome://extensions -> Errors; no new missing webRequest host-permission error.
+[ ] Check technical exports do not contain passwords, auth cookies or usable signed URL values. Do not distribute raw capture files containing secrets.
+[ ] Restart Chrome; check automatic capture is still enabled or paused according to saved preference.
+
+REMINDERS: Chrome does not offer pre-request foresight; DevTools-only raw response analysis requires F12. Live Windows results are not verified by offline tests.
+
+
+v7.19 ADDITIONAL ACCEPTANCE — INCREMENTAL STORAGE
+[ ] Capture Diagnostics reports IndexedDB journal on Chrome.
+[ ] Multiple requests produce journal changes without extension errors.
+[ ] Restart extension service worker without stopping capture; same session
+    and recorded request count return after refresh.
+[ ] 100+ requests across two tabs keep separate session IDs and origins.
+[ ] Navigating to a different origin archives the previous segment.
+[ ] Stop and reopen archived session: security/PIM/download observations retained.
+[ ] Delete an inactive saved session: it does not reappear from local mirror.
+[ ] Storage errors, if induced in a controlled test profile, are visible.
+[ ] Unassigned-response counter is labelled "since worker start" and never
+    misrepresented as a complete-network event count.
+[ ] Do not store synthetic access-token values in live JSON or exported metadata.
+[ ] Verify pause and resume do not create new sessions while paused.

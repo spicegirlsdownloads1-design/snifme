@@ -1,0 +1,37 @@
+TRUFFLEHOG INTELLIGENCE v7.19.0 — WINDOWS QUICK START
+=====================================================
+
+1. Extract the ZIP and enter the Trufflehog-Intelligence folder.
+2. Double-click run.bat; choose 1 for Chrome extension setup.
+3. Enable Developer mode, click Load unpacked, select the folder with manifest.json.
+4. Chrome will request broad HTTP/HTTPS host permission. Approve it to use automatic all-sites capture.
+5. Under chrome://extensions → Trufflehog → Details → Site access, select On all sites.
+6. Browse or reload a normal website. The popup should show Automatic recording without a Start click.
+7. To stop all automatic capture, untick Automatically capture all permitted websites in the popup.
+8. For the optional localhost test, choose 2 in run.bat and click Run all test requests.
+9. For JSON response-body, asset licensing AND product/media correlation, press F12 on the inspected localhost tab before rerunning the test.
+10. Dashboard → Network & APIs → Product & Asset Relationships and Hybrid workflow stages.
+11. Dashboard → Security → Import privacy preflight can privately scan a selected HAR/cURL/PowerShell log before sharing.
+
+Chrome only provides evidence once actual requests happen; Trufflehog does not query hidden resources ahead of browsing. Browser-protected pages are excluded. The app does not acquire credentials or bypass login/licensing requirements.
+
+All-sites access is a significant privacy permission: read README.md before enabling on sensitive websites. Local storage and redacted exports are retained. Chrome's site access settings can restrict which websites the extension sees.
+
+New in v7.18: the Product & Asset view separates asset-family matches from matching rendition descriptors.
+
+New in v7.18: open Dashboard -> Security -> Security Intelligence for browser-observed URL credential indicators, signed-link windows, CORS policies, POST field names, cookie flags and redirect/Referer observations. These are passive review findings, NOT verified CVEs. An offline HAR review is included in the same page (12 MB/3,000-entry cap).
+
+
+NEW IN v7.19 — CAPTURE DURABILITY
+--------------------------------
+1. Open the dashboard → Capture diagnostics.
+2. Verify "Capture persistence" shows Durable IndexedDB journal.
+3. Browse/reload a few pages, refresh diagnostics and look for checkpoint and
+   uncompacted-change counters.
+4. Restart the extension service worker from chrome://extensions and verify
+   recorded requests reappear in the same capture (do not clear extension data).
+5. Stop capture, reopen the saved investigation and verify the request count.
+6. Check Chrome extension Errors for IndexedDB or quota failures.
+
+This step-by-step runtime test is mandatory before treating v7.19 as production
+verified. Do not mistake zero unattributed responses for guaranteed coverage.
