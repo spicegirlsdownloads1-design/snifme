@@ -3,7 +3,7 @@
   "name": "Trufflehog Intelligence \u2014 Local Inspector",
   "short_name": "Trufflehog Intel",
   "version": "7.19.0",
-  "description": "Generic passive browser sniffer with durable incremental capture journal, security intelligence and global pause.",
+  "description": "Generic passive browser sniffer with durable capture journal and privacy-safe secret-exposure intelligence.",
   "action": {
     "default_title": "Trufflehog Intelligence",
     "default_popup": "popup.html"
