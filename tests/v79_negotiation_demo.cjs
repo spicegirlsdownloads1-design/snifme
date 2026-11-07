@@ -1,0 +1,11 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path');
+const N=require('../har_image_negotiation.js');const read=n=>JSON.parse(fs.readFileSync(path.join(__dirname,n),'utf8'));
+const context={sameSite:'yes',sameActions:'yes',sameAccount:'yes',sameScope:'yes',sameBrowserCoverage:'yes'};
+const base=read('v79-negotiation-baseline.har'),after=read('v79-negotiation-comparison.har');
+const x=N.audit(base),y=N.audit(after),cmp=N.compare(base,after,context);
+if(x.coverage.imageResponses!==6||y.coverage.imageResponses!==6||cmp.readiness!=='Context declared comparable')throw Error('Unexpected demo coverage');
+const brief={format:cmp.format,readiness:cmp.readiness,coverage:cmp.coverage,nonzero:cmp.signals.filter(s=>s.baseline||s.comparison)};
+for(const word of ['synthetic-image-provider.invalid','X-Amz-Signature','dummy-nonfunctional','example-0.jpg'])if(JSON.stringify(brief).includes(word))throw Error('Demo contains raw HAR data');
+if(require.main===module)console.log(JSON.stringify(brief,null,2));
+module.exports=brief;

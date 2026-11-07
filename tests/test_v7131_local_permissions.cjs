@@ -1,0 +1,12 @@
+const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
+const dir=path.join(__dirname,'..');
+const m=JSON.parse(fs.readFileSync(path.join(dir,'manifest.json'),'utf8'));
+assert.equal(m.version,'7.19.0');
+assert.deepEqual(m.host_permissions,['http://*/*','https://*/*']);
+assert(!m.optional_host_permissions,'All-sites access must be declared and approved by Chrome');
+const b=fs.readFileSync(path.join(dir,'background.js'),'utf8');
+assert(/state\?\.enabled/.test(b),'Only active sessions are processed');
+assert(/hasHostAccess/.test(b),'Per-site access checks must remain');
+console.log('PASS v7.15 all-sites host scope and session gating');

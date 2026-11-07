@@ -1,0 +1,10 @@
+{
+  "origin": "https://gallery.example.test",
+  "requests": [
+    {"url":"https://api.captureweb.net/v1/assets?access_token=SYNTHETIC_NO_REAL_TOKEN", "type":"xmlhttprequest", "method":"GET", "status":200, "authQueryClasses":["legacy-access-token-query"]},
+    {"url":"https://api.captureweb.net/media/demo.jpg?signature=SYNTHETIC", "type":"image", "mime":"image/jpeg", "status":200, "signedQuery":true, "cacheScope":"public", "cacheMaxAge":86400},
+    {"url":"https://gallery.example.test/not-permitted.jpg", "type":"image", "mime":"image/jpeg", "status":403},
+    {"url":"https://gallery.example.test/download", "type":"other", "method":"GET", "status":200, "attachmentDisposition":true}
+  ],
+  "counters":{"requestsDropped":0}
+}
