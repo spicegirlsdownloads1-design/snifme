@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+const root=path.resolve(__dirname,'..');const read=x=>fs.readFileSync(path.join(root,x),'utf8');
+const manifest=JSON.parse(read('manifest.json'));assert.equal(manifest.version,'7.19.0');
+for(const banned of ['cookies','debugger','webRequestBlocking'])assert(!manifest.permissions.includes(banned));
+const html=read('dashboard.html'),js=read('dashboard.js');
+assert(html.includes('<script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script>'));
+for(const txt of ['THIHARPrivacy.audit(parsed)','THIHARDAM.audit(parsed)','function renderDAMWorkflowReport','Analyse DAM workflow (offline)','if(inspectedFile!==file)','trufflehog-har-dam.json','trufflehog-har-dam.csv','THIHARCoverage.reconcile(parsed,records)'])assert(js.includes(txt),txt);
+assert(js.indexOf('Analyse DAM workflow (offline)')<js.indexOf('if(!groups.length)',js.indexOf('function renderHARCoverage')));
+console.log('PASS v7.0 offline DAM dashboard, privacy preflight gate, older HAR modules and no new permissions');

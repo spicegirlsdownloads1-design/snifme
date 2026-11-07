@@ -1,0 +1,10 @@
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const text=x=>fs.readFileSync(x,'utf8');
+assert.equal(require('../manifest.json').version,'7.19.0');
+assert(text('background.js').includes("files: ['scanner.js', 'frame_scope.js'"));
+assert(text('background.js').includes('THIFrameScope.cleanRow'));
+assert(text('content.js').includes('THIFrameScope.inspect'));
+assert(text('dashboard.js').includes('Same-origin iframe inspection coverage'));
+assert(!text('manifest.json').includes('"debugger"'));
+assert(!text('manifest.json').includes('"webNavigation"'));
+console.log('PASS v4.8 wiring: no new permissions, frame evidence and scripts injected');

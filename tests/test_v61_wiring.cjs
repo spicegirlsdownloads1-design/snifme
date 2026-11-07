@@ -1,0 +1,11 @@
+ 'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const m=require('../manifest.json');assert.equal(m.version,'7.19.0');
+assert(!m.permissions.some(p=>['debugger','webRequestBlocking','cookies'].includes(p)));
+const h=fs.readFileSync('dashboard.html','utf8'),j=fs.readFileSync('dashboard.js','utf8');
+assert(h.includes('data-view="capture-repair"'));
+assert(h.includes('<script src="lab_acceptance.js"></script><script src="capture_repair.js"></script><script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(j.includes('THICaptureRepair.evaluate({acceptance:acceptanceReport,benchmark,recording})'));
+assert(j.includes("['acceptance','capture-repair'].includes(view)"));
+assert(j.includes("if(view==='capture-repair'){renderCaptureRepair(container);return;}"));
+console.log('PASS v6.1 dashboard capture repair wiring, permissions and existing benchmark');

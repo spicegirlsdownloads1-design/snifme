@@ -1,0 +1,16 @@
+ 'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const root=require('../manifest.json');assert.equal(root.version,'7.19.0');
+for(const banned of ['debugger','cookies','webRequestBlocking'])assert(!root.permissions.includes(banned));
+const html=fs.readFileSync(require('node:path').join(__dirname,'../dashboard.html'),'utf8');
+const js=fs.readFileSync(require('node:path').join(__dirname,'../dashboard.js'),'utf8');
+assert(html.includes('data-view="har-coverage"'));
+assert(html.includes('<script src="scanner.js"></script><script src="image_intel.js"></script>'));
+assert(html.indexOf('<script src="scanner.js"></script>')<html.indexOf('<script src="har_coverage.js"></script>'));
+assert(html.includes('<script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(js.includes('function renderHARCoverage(container)'));
+assert(js.includes('THIHARCoverage.reconcile(parsed,records)'));
+assert(js.includes("if(view==='har-coverage'){renderHARCoverage(container);return;}"));
+assert(js.includes("'har-coverage':['category'"));
+for(const view of ['evidence-synthesis','workflow-pattern','compare-readiness','policy-drift','dam-specialists','download-traces','local-benchmark'])assert(html.includes('data-view="'+view+'"'));
+console.log('PASS v6.7 dashboard HAR import, report display, export wiring and inherited modules');

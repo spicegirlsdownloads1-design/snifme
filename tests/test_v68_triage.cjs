@@ -1,0 +1,43 @@
+'use strict';
+const assert = require('node:assert/strict');
+require('../scanner.js');
+const HAR = require('../har_coverage.js');
+const TRI = require('../har_triage.js');
+const ORIGIN='https://archive.example.test';
+const TOKEN='PRIVATE_credential_value_28378';
+const entry=(u,m='GET',status=200,mime='application/json',date='2026-10-24T12:00:01Z')=>({
+ startedDateTime:date,request:{url:u,method:m,headers:[{name:'Authorization',value:TOKEN}],postData:{text:TOKEN}},
+ response:{status,content:{mimeType:mime,text:TOKEN}}
+});
+const request=(u,m='GET',status=200,type='xmlhttprequest')=>({url:u,method:m,status,type,mime:'application/json',at:'2026-10-24T12:00:01Z',raw:TOKEN});
+const url=ORIGIN+'/api/request?signature='+TOKEN;
+const media='https://cdn.external.test/photo.jpg?X-Amz-Signature='+TOKEN;
+const har={log:{entries:[entry(url,'POST',202),entry(url,'POST',202),entry(media,'GET',200,'image/jpeg'),entry(ORIGIN+'/file.js','GET',200,'text/javascript')]}};
+const saved=[{origin:ORIGIN,captureGroupId:'secret-'+TOKEN,segmentIndex:0,endedAt:'2026-10-24T12:00:30Z',requests:[request(url,'POST',202),request(ORIGIN+'/old.js','GET',200,'script')],counters:{requestsDropped:3}}];
+const r=HAR.reconcile(har,saved);
+assert.equal(r.coverage.harRequests,4);assert.equal(r.coverage.savedRequests,2);
+assert.equal(r.coverage.exactMatches,1);assert.equal(r.coverage.harOnly,3);assert.equal(r.coverage.savedOnly,1);
+assert.equal(r.coverage.repeatedComparableKeys,1);
+const ext=r.scopeRows.find(x=>x.scope==='External origins');assert.equal(ext.harOnly,1);assert.equal(ext.captureOnly,0);
+const site=r.scopeRows.find(x=>x.scope==='Same-site origin');assert.equal(site.harOnly,2);assert.equal(site.captureOnly,1);
+const ctx={sameSession:'yes',sameActions:'yes',devtoolsBeforeNavigation:'no',preserveLog:'no',comparableSiteAccess:'no',payload:TOKEN};
+const t=TRI.assess(r,ctx);
+assert.equal(t.format,'trufflehog-har-coverage-triage');
+for(const id of ['late-devtools','har-navigation-gap','permissions-differ','dropped-records','repeated-identity','har-only-external','category-4'])assert(t.signals.some(x=>x.id===id),id);
+assert.equal(t.context.payload,undefined);
+assert.deepEqual(Object.keys(t.context).sort(),['comparableSiteAccess','devtoolsBeforeNavigation','preserveLog','sameActions','sameSession'].sort());
+assert.deepEqual(t.signals.map(x=>x.level).filter(x=>x==='high').length>=2,true);
+let out=JSON.stringify({r,t});
+for(const forbidden of [TOKEN,'archive.example.test','cdn.external.test','/api/request','/file.js','/old.js','Authorization','secret-', 'postData'])assert(!out.includes(forbidden),forbidden);
+const uncertain=TRI.assess(r,{sameSession:'malicious:'+TOKEN});assert.equal(uncertain.context.sameSession,'unknown');
+assert(!JSON.stringify(uncertain).includes(TOKEN));
+assert.throws(()=>TRI.assess({format:'wrong',rows:[]}),/reconciliation/);
+const zero=HAR.reconcile({log:{entries:[entry(url,'POST',202)]}},[{...saved[0],counters:{},requests:[request(url,'POST',202)]}]);
+const clean=TRI.assess(zero,{sameSession:'yes',sameActions:'yes',devtoolsBeforeNavigation:'yes',preserveLog:'yes',comparableSiteAccess:'yes'});
+assert.equal(clean.assessment,'No numerical gaps observed; completeness unverified');
+assert(clean.signals.some(x=>x.id==='no-count-gaps'));
+const disjoint={...r,warnings:['HAR and saved capture time windows do not overlap within five minutes']};
+assert(TRI.assess(disjoint).signals.some(x=>x.id==='time-disjoint'));
+const bad={...r,rows:r.rows.map((x,i)=>i===0?{...x,category:'<img src=x onerror=alert(1)>',harOnly:1}:x),warnings:[TOKEN]};
+const tbad=TRI.assess(bad);assert(!JSON.stringify(tbad).includes('<img'));
+console.log('PASS v6.8 independent HAR gap triage: bounded counts, origin scopes, duplicate confidence, operator context and strict redaction');

@@ -1,0 +1,13 @@
+const assert=require('node:assert/strict');
+const C=require('../frame_worker_intel.js');
+const own='https://gallery.example';
+assert.deepEqual(C.clean({kind:'embedded-frame',origin:'https://cdn.example/photo?token=SECRET',evidence:'iframe element',sandboxed:true},own),{kind:'embedded-frame',origin:'https://cdn.example',relationship:'cross-origin',sandboxed:true,evidence:'iframe element'});
+assert.equal(C.clean({kind:'unknown',origin:'https://cdn.example',evidence:'iframe element'},own),null);
+assert.equal(C.clean({kind:'embedded-frame',origin:'javascript:alert(1)',evidence:'iframe element'},own),null);
+assert.equal(C.clean({kind:'embedded-frame',origin:'https://example.org',evidence:'resource timing hint'},own),null);
+let data=C.analyze({origin:own,embeddedContexts:[{kind:'controlled-service-worker',origin:'https://gallery.example/work.js?key=SECRET',evidence:'service worker controller'},{kind:'embedded-frame',origin:'https://cdn.example/frame?secret=SECRET',evidence:'iframe element',sandboxed:true}],requests:[{type:'sub_frame',url:'https://third.example/iframe?id=SECRET'}]});
+assert.equal(data.workerClues,1);
+assert.equal(data.embedded,2);
+assert(!JSON.stringify(data).includes('SECRET'));
+assert(!JSON.stringify(data).includes('/work.js'));
+console.log('PASS v4.7 frames: origin-only parsing, URL redaction, observed subframes, worker controller');

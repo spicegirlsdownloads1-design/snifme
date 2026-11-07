@@ -1,0 +1,40 @@
+'use strict';
+const assert=require('node:assert/strict');
+const U=require('../upload_api_intel.js');
+const D=require('../download_observer.js');
+const secret='SIGNING_SECRET_NEVER_RETAIN_2626';
+const common={tabId:2,requestId:'upload-secret-'+secret,method:'PUT',type:'xmlhttprequest',timeStamp:Date.now()};
+const request=(url,method='PUT',extra={})=>({...common,url,method,...extra});
+const s3=U.detect('request',request('https://bucket.s3.us-east-1.amazonaws.com/photo.jpg?uploadId='+secret+'&partNumber=21&X-Amz-Signature='+secret));
+assert.equal(s3.provider,'S3-compatible');assert.equal(s3.phase,'part transfer');
+const s3Init=U.detect('request',request('https://bucket.s3.us-east-1.amazonaws.com/photo.jpg?uploads&secret='+secret,'POST'));
+assert.equal(s3Init.phase,'initiate');
+const s3Commit=U.detect('request',request('https://bucket.s3.us-east-1.amazonaws.com/photo.jpg?uploadId='+secret,'POST'));
+assert.equal(s3Commit.phase,'commit request');
+const azure=U.detect('request',request('https://example.blob.core.windows.net/private/'+secret+'?comp=block&blockid='+secret));
+assert.equal(azure.phase,'block transfer');
+const azCommit=U.detect('request',request('https://example.blob.core.windows.net/private/'+secret+'?comp=blocklist','PUT'));
+assert.equal(azCommit.phase,'commit request');
+const gcs=U.detect('request',request('https://storage.googleapis.com/upload/storage/v1/b/bucket/o?uploadType=resumable&name='+secret,'POST'));
+assert.equal(gcs.provider,'Google Cloud Storage-compatible');assert.equal(gcs.phase,'initiate');
+const gcsPatch=U.detect('request',request('https://storage.googleapis.com/upload/storage/v1/b/bucket/o?upload_id='+secret,'PUT'));
+assert.equal(gcsPatch.phase,'resumable transfer');
+const tus=U.detect('headers',request('https://upload.example.invalid/private/'+secret,'PATCH',{requestHeaders:[
+ {name:'Tus-Resumable',value:'1.0.0'},{name:'Upload-Offset',value:'131072'},{name:'Upload-Metadata',value:'name '+secret},
+ {name:'Authorization',value:'Bearer '+secret}]}));
+assert.equal(tus.provider,'tus-compatible');assert.equal(tus.phase,'resumable transfer');
+assert(tus.markers.includes('tus offset header'));
+assert.equal(U.detect('headers',request('https://example.invalid/anything','GET')),null);
+const generic=U.detect('request',request('http://127.0.0.1:8790/upload','POST',{requestBody:{formData:{file:[secret],csrf:[secret]}}}));
+assert.equal(generic.provider,'Multipart-form-compatible');
+for(const x of [s3,s3Init,s3Commit,azure,azCommit,gcs,gcsPatch,tus,generic])assert(!JSON.stringify(x).includes(secret));
+const file=D.classify('request',request('https://example.invalid/opaque?uploadId='+secret+'&partNumber=3','PUT'));
+assert.equal(file.uploadProtocol?.phase,'part transfer');assert(!JSON.stringify(file.uploadProtocol).includes(secret));
+const arr=[file,{...file,stage:'complete',status:200,uploadProtocol:U.detect('complete',request('https://example.invalid/opaque?uploadId='+secret+'&partNumber=3','PUT',{statusCode:200}))}];
+const report=U.analyse({downloadEvents:arr});
+assert.equal(report.rows.length,1);assert.equal(report.rows[0].outcome,'HTTP request completed (asset status unknown)');
+assert(!JSON.stringify(report).includes('upload-secret-'));
+const evil={downloadEvents:[{stage:'request',requestId:'a',host:secret,at:secret,
+ uploadProtocol:{provider:'S3-compatible',phase:'initiate',markers:[secret,'upload-session key'],status:999,method:secret}}]};
+assert(!JSON.stringify(U.analyse(evil)).includes(secret));
+console.log('PASS v5.6 upload: S3, Azure, GCS, tus, generic form, privacy-safe aggregation and opt-in detector');

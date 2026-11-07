@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict');
+const I=require('../site_relationships.js');
+const a=I.snapshot([{origin:'https://archive.example',requests:[{url:'https://media.example.com/photo?token=SECRET',type:'image'},{url:'https://api.example.com/v2/records?q=SECRET',type:'xmlhttprequest'},{url:'https://archive.example/page',type:'main_frame'}]},{origin:'https://archive.example',requests:[{url:'https://media.example.com/a.jpg',type:'image'}]}]);
+const b=I.snapshot([{origin:'https://publisher.example',requests:[{url:'https://media.example.com/other.jpg?token=HIDDEN',type:'image'},{url:'https://api.example.com/x',type:'xmlhttprequest'},{url:'https://another.example/script.js',type:'script'}]}]);
+assert.equal(a.segments,2);assert(!a.hosts.some(x=>x.host==='archive.example'));
+const cmp=I.compare(a,b);assert.equal(cmp.sharedHostCount,2);assert(cmp.rows.some(x=>x.host==='media.example.com'&&x.sharedRoles==='Image delivery'));
+assert(!JSON.stringify(cmp).includes('SECRET'));assert(!JSON.stringify(cmp).includes('HIDDEN'));
+assert.match(cmp.note,/do not establish a shared DAM database/i);
+assert.throws(()=>I.compare(a,a),/different website origins/);
+assert.throws(()=>I.snapshot(Array.from({length:41},()=>({origin:'https://x.example',requests:[]}))),/40 segments/);
+console.log('PASS v4.7 offline cross-site relationships and redacted role classifications');

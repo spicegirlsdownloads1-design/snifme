@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const m=require('../manifest.json');
+const html=fs.readFileSync('dashboard.html','utf8'),js=fs.readFileSync('dashboard.js','utf8'),source=fs.readFileSync('generic_sequence.js','utf8');
+assert.equal(m.version,'7.19.0');
+assert(html.includes('data-view="generic-sequence"'));
+assert(html.includes('src="generic_sequence.js"'));
+assert(html.indexOf('src="generic_sequence.js"')<html.indexOf('src="dashboard.js"'));
+assert(js.includes("names['generic-sequence']"));
+assert(js.includes("case 'generic-sequence':return THIGenericSequence.analyze(record).transitions;"));
+assert(js.includes('function renderGenericSequence(container)'));
+assert(js.includes('trufflehog-generic-sequence.json'));
+assert(js.includes('trufflehog-generic-sequence.csv'));
+assert(!source.includes('fetch('));
+assert.deepEqual(m.permissions,['storage','tabs','scripting','webRequest','downloads','notifications']);
+console.log('PASS v7.11 generic timeline UI, redacted exports, and unchanged Chrome permissions');

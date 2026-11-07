@@ -1,0 +1,34 @@
+'use strict';
+const assert=require('node:assert/strict');
+const M=require('../dam_policy_compare.js');
+const secret='SIG_SECRET_shall_never_be_exported_ABC';
+const site='https://photo.example';
+function make(group,n,override={}){return {origin:site,captureGroupId:group,segmentIndex:0,endedAt:'2026-10-24T12:00:00Z',counters:{},requests:Array.from({length:n},(_,i)=>({type:'image',mime:'image/jpeg',status:200,cacheScope:i%3===0?'public':'private',cacheMaxAge:i%3===0?86400:0,signedQuery:i%2===0,url:`https://cdn.example/img?sig=${secret}`})),...override};}
+const left=[make('A',40)],right=[make('B',40,{requests:make('B',40).requests.map((x,i)=>({...x,status:i<10?403:200,signedQuery:true}))})];
+const r=M.compare(left,right);
+assert.equal(r.rows.length,6);
+const find=s=>r.rows.find(x=>x.category===s);
+assert.equal(find('Media returned 401/403').earlierCount,0);
+assert.equal(find('Media returned 401/403').laterCount,10);
+assert.equal(find('Media returned 401/403').laterPerThousand,250);
+assert.equal(find('Media with signed URL indicators').assessment,'Higher observed share');
+assert.equal(r.overview.comparableSample,false,'No API requests means all categories are not comparable');
+assert.equal(find('API request with credential-like query class').assessment,'Not comparable (no sample)');
+assert(!JSON.stringify(r).includes(secret));
+assert(!JSON.stringify(r).includes('cdn.example'));
+assert(!JSON.stringify(r).includes(site));
+assert.equal(M.compare([make('A',2)],[make('B',3)]).rows[0].assessment,'Small sample; descriptive only');
+assert.throws(()=>M.compare([make('A',1)], [{...make('B',1),origin:'https://different.example'}]),/same exact site origin/i);
+assert.throws(()=>M.compare([make('A',1)], [make('A',1)]),/different saved capture groups/i);
+assert.throws(()=>M.compare([],[make('B',1)]),/saved capture group/i);
+assert.throws(()=>M.aggregate([{...make('C',1),origin:'file:///tmp/test'}]),/valid HTTP origin/i);
+const incomplete=M.compare([make('A',23,{endedAt:null,counters:{requestsDropped:5},requests:[{type:'image',status:200,carriedFromSegment:true},...make('A',23).requests]})],[make('B',23)]);
+assert(incomplete.blindspots.some(x=>/dropped/i.test(x)));
+assert.equal(incomplete.overview.earlierRequests,23,'Carried-over events not double-counted');
+const apiRecord={...make('A',0),requests:[{type:'fetch',url:'https://photo.example/api?token='+secret,status:200,authQueryClasses:['legacy-access-token-query']},{type:'fetch',status:200,authQueryClasses:['ambiguous-token-query']}]};
+const c=M.aggregate([apiRecord]);assert.equal(c.counts.apiAuthQueries,1);
+// malicious imported fields must never reach report, including extra keys and string payloads
+const hostile=M.compare([{...make('A',20),origin:site+'/?token='+secret,evil:secret,requests:[{url:'https://private.example/'+secret,downloadFilename:secret,type:'image',status:200},...make('A',20).requests]}], [make('B',20)]);
+assert(!JSON.stringify(hostile).includes(secret));assert(!JSON.stringify(hostile).includes('private.example'));
+assert(!JSON.stringify(hostile).includes('photo.example'));
+console.log('PASS v6.3 policy observations: safe rates, small samples, carried records, blind spots, origin guard, redaction');

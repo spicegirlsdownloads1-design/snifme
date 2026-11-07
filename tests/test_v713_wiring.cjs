@@ -1,0 +1,18 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const html=fs.readFileSync('dashboard.html','utf8'),dash=fs.readFileSync('dashboard.js','utf8'),worker=fs.readFileSync('background.js','utf8'),src=fs.readFileSync('generic_boundary_review.js','utf8'),scanner=fs.readFileSync('scanner.js','utf8');
+const manifest=require('../manifest.json');
+assert.equal(manifest.version,'7.19.0');
+assert.deepEqual(manifest.permissions,['storage','tabs','scripting','webRequest','downloads','notifications']);
+assert.deepEqual(manifest.host_permissions,['http://*/*','https://*/*']);
+assert(html.includes('data-view="universal-boundaries"'));
+assert(html.includes('<script src="generic_boundary_review.js"></script>'));
+assert(html.indexOf('src="generic_boundary_review.js"')<html.indexOf('src="dashboard.js"'));
+for(const x of ['THIUniversalBoundaryReview.analyze(record)','renderUniversalBoundaries(container)',"case 'universal-boundaries'",'trufflehog-universal-boundaries.json','trufflehog-universal-boundaries.csv'])assert(dash.includes(x),x);
+assert(worker.includes('signatureKeyPresent: info.signatureKeyPresent===true'));
+assert(worker.includes("signedValidityWindow: info.signedValidityWindow||'unknown'"));
+assert(scanner.includes('function signingEvidence('));
+assert(!/\b(?:fetch|XMLHttpRequest|sendBeacon|WebSocket)\s*\(/.test(src));
+assert(!src.includes('chrome.'));
+assert(!src.includes('Directus')&&!src.includes('Pimcore')&&!src.includes('ResourceSpace'));
+console.log('PASS v7.13 boundary wiring, passive-only analysis');

@@ -1,0 +1,13 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const m=require('../manifest.json');assert.equal(m.version,'7.19.0');
+assert(!m.permissions.some(p=>['debugger','cookies','webRequestBlocking'].includes(p)));
+const h=fs.readFileSync('dashboard.html','utf8'),ui=fs.readFileSync('dashboard.js','utf8');
+assert(h.includes('data-view="case-compare"'));
+assert(h.includes('<script src="case_compare.js"></script><script src="lab_acceptance.js"></script><script src="capture_repair.js"></script><script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(ui.includes('function renderCaseChange(container)'));
+assert(ui.includes('THICaseCompare.compare(oldRows,newRows)'));
+assert(ui.includes('THICaseCompare.pack(caseChangeReport)'));
+assert(ui.includes("case 'case-compare':return caseChangeReport?.metrics||[];"));
+assert(fs.existsSync('RELEASE-v5.8.md'));
+console.log('PASS v5.9 wiring: local case compare, redacted export, no new permissions, prior capabilities preserved');

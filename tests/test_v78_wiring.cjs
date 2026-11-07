@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),p=require('node:path');
+const root=p.resolve(__dirname,'..'),read=x=>fs.readFileSync(p.join(root,x),'utf8');
+const manifest=JSON.parse(read('manifest.json'));
+assert.equal(manifest.version,'7.19.0');
+assert.deepEqual(manifest.permissions,['storage','tabs','scripting','webRequest','downloads','notifications']);
+const html=read('dashboard.html'),js=read('dashboard.js'),mod=read('har_cache_revalidation.js');
+assert(html.includes('<script src="har_cache_revalidation.js"></script>'));
+assert(html.indexOf('<script src="har_cache_revalidation.js"></script>')<html.indexOf('<script src="dashboard.js"></script>'));
+for(const needle of ['THIHARCacheRevalidation.audit(parsed)','THIHARCacheRevalidation.compare(firstParsed,secondParsed,declared)','2f. Inspect cache revalidation (offline)','Offline cache revalidation & 304 evidence','Offline cache revalidation comparison','Export cache revalidation (redacted JSON)','Export cache comparison (redacted CSV)','inspectedFile!==file','reviewedSecondFile!==secondFile','harCacheComparison=null'])assert(js.includes(needle),needle);
+assert(js.indexOf('THIHARPrivacy.audit(firstParsed);THIHARPrivacy.audit(secondParsed)')<js.indexOf('THIHARCacheRevalidation.compare(firstParsed,secondParsed,declared)'));
+assert(!/\bfetch\s*\(|XMLHttpRequest|chrome\.downloads\.download|chrome\.webRequest|\.send\s*\(/.test(mod));
+console.log('PASS v7.8 wiring: privacy gates, no network, legacy permissions');

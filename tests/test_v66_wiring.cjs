@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict');const fs=require('node:fs');
+const manifest=require('../manifest.json');
+assert.equal(manifest.version,'7.19.0');
+for(const permission of ['debugger','cookies','webRequestBlocking'])assert(!manifest.permissions.includes(permission));
+const html=fs.readFileSync('dashboard.html','utf8'),js=fs.readFileSync('dashboard.js','utf8');
+assert(html.includes('data-view="evidence-synthesis"'));
+assert(html.includes('<script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(js.includes('function renderEvidenceSynthesis(container)'));
+assert(js.includes('THIEvidenceSynthesis.synthesize(ar,br,context)'));
+assert(js.includes("if(view==='evidence-synthesis'){renderEvidenceSynthesis(container);return;}"));
+assert(js.includes("'evidence-synthesis':['indicator'"));
+for(const existing of ['workflow-pattern','compare-readiness','policy-drift','dam-specialists','download-traces','quality-ledger','upload-protocols'])assert(html.includes('data-view="'+existing+'"'));
+console.log('PASS v6.6 dashboard wiring, existing modules and no new permissions');

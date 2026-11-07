@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const p=x=>fs.readFileSync(x,'utf8'),m=require('../manifest.json');
+assert.match(m.version,/^(?:4\.(?:[6-9]|[1-9]\d)\.\d+|5\.[0-9]\.0|6\.\d+\.\d+|7\.\d+\.\d+)$/);
+assert(p('devtools.html').includes('secret_fingerprints.js'));
+assert(p('dashboard.html').includes('data-view="exposure-history"'));
+assert(p('dashboard.js').includes('function renderExposureHistory(container)'));
+assert(p('background.js').includes('SET_SECRET_CHANGE_NOTIFICATIONS'));
+assert(p('background.js').includes('GET_EXPOSURE_HISTORY'));
+assert(p('background.js').includes('TRUSTED_CONTEXTS'));
+assert(!p('secret_fingerprints.js').includes('fetch('));
+assert(p('README.md').includes('v5.0')); 
+console.log('PASS v4.6 wiring: keyed scanning, history view, settings and trusted storage');

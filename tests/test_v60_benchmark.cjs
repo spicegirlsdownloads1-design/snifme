@@ -1,0 +1,15 @@
+ 'use strict';
+const assert=require('node:assert/strict');const L=require('../lab_acceptance.js');
+const origin='http://127.0.0.1:8770';
+const paths=[['/v60-lab.html','GET',200],['/v60-lab.js','GET',200],['/v60-lab.css','GET',200],['/v60-lab.json','GET',200],['/v60-lab.svg','GET',200],['/v60-job','POST',202],['/v60-state','GET',200],['/v60-file','GET',200]];
+const req=paths.map(([path,method,status])=>({url:origin+path+'?api_key=DO_NOT_RETAIN',method,status,attachmentDisposition:path==='/v60-file'}));
+const record={origin,requests:req,downloadObserverEverEnabled:true,downloadEvents:[{stage:'request',method:'POST',host:'127.0.0.1',credentials:'DO_NOT_RETAIN'}],resourceScans:[{url:origin+'/v60-lab.js',sha256:'f'.repeat(64)}],counters:{requestsDropped:0}};
+const r=L.evaluate(record,{downloadObserver:true});assert.equal(r.verdict,'observed-tests-pass');assert.equal(r.summary.pass,11);assert.equal(r.totals.fixtureRequests,8);
+const serialized=JSON.stringify(r);assert(!serialized.includes('DO_NOT_RETAIN'));assert(!serialized.includes('api_key'));assert(!serialized.includes('/v60-lab'));assert(!serialized.includes('http://'));
+assert.equal(L.evaluate({...record,origin:'https://example.org'},{}).verdict,'not-run');
+assert.equal(L.evaluate({...record,requests:req.map(x=>({...x,status:403}))},{}).verdict,'needs-review');
+assert.equal(L.evaluate({...record,resourceScans:[]},{}).checks.find(x=>x.id==='scan').status,'warn');
+assert.equal(L.evaluate({...record,downloadEvents:[]},{}).checks.find(x=>x.id==='observer').status,'warn');
+assert.equal(L.evaluate({...record,counters:{requestsDropped:3}},{}).checks.find(x=>x.id==='retention').status,'warn');
+const foreign={...record,origin:'http://localhost:8770',requests:[{url:'http://127.0.0.1:8770/v60-job',method:'POST',status:202}]};assert.equal(L.evaluate(foreign,{}).verdict,'not-run');
+console.log('PASS v6.0 deterministic lab acceptance, scope isolation, missing evidence and exports');

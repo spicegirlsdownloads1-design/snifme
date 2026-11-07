@@ -1,0 +1,10 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const read=f=>fs.readFileSync(require('node:path').join(__dirname,'..',f),'utf8');
+const manifest=JSON.parse(read('manifest.json'));assert.equal(manifest.version,'7.19.0');
+for(const forbidden of ['debugger','cookies','webRequestBlocking'])assert(!manifest.permissions.includes(forbidden));
+const html=read('dashboard.html'),js=read('dashboard.js');
+assert(html.includes('<script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script>'));
+for(const part of ['THIHARStageCompare.audit(firstParsed,secondParsed,declared)','if(reviewedSecondFile!==secondFile)','if(inspectedFile!==firstFile)','THIHARPrivacy.audit(firstParsed);THIHARPrivacy.audit(secondParsed)','4. Inspect second HAR privacy locally','5. Compare two reviewed HARs (offline)','trufflehog-har-stage-compare.json','trufflehog-har-stage-compare.csv'])assert(js.includes(part),part);
+assert(js.indexOf('5. Compare two reviewed HARs')<js.indexOf("if(!groups.length)",js.indexOf('function renderHARCoverage')));
+console.log('PASS v7.2: UI dual HAR independent privacy gates, redacted exports, no permission escalation');

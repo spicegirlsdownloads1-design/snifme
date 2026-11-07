@@ -1,0 +1,12 @@
+'use strict';const assert=require('node:assert/strict'),fs=require('node:fs');
+const m=require('../manifest.json');assert.equal(m.version,'7.19.0');
+for(const p of ['debugger','cookies','webRequestBlocking'])assert(!m.permissions.includes(p));
+const h=fs.readFileSync('dashboard.html','utf8'),js=fs.readFileSync('dashboard.js','utf8');
+assert(h.includes('data-view="dam-specialists"'));
+assert(h.includes('<script src="dam_specialists.js"></script><script src="case_intel.js"></script><script src="case_crypto.js"></script><script src="case_compare.js"></script><script src="lab_acceptance.js"></script><script src="capture_repair.js"></script><script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(js.includes("case 'dam-specialists':return THIDAMSpecialists.analyze(record).profiles;"));
+assert(js.includes('function renderDAMSpecialists(container)'));
+assert(js.includes('damSpecialists:THIDAMSpecialists.report(record)'));
+assert(js.includes("'dam-specialists':['vendor'"));
+assert(fs.existsSync('RELEASE-v5.6.md'));
+console.log('PASS v5.7 wiring: report exports, view integration, previous release preserved, no new permissions');

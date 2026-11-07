@@ -1,0 +1,11 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const manifest=JSON.parse(read('manifest.json'));
+assert.equal(manifest.version,'7.19.0');
+for(const banned of ['debugger','cookies','webRequestBlocking'])assert(!manifest.permissions.includes(banned));
+const html=read('dashboard.html'),js=read('dashboard.js');
+assert(html.includes('<script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script>'));
+for(const part of ['THIHARSequence.audit(parsed)','Run privacy preflight for this exact HAR before stage analysis','3. Reconstruct observed stage sequence (offline)',"if(inspectedFile!==file)",'trufflehog-har-sequence.csv','trufflehog-har-sequence.json','THIHARDAM.audit(parsed)','THIHARCoverage.reconcile(parsed,records)'])assert(js.includes(part),part);
+assert(js.indexOf('3. Reconstruct observed stage sequence')<js.indexOf('if(!groups.length)',js.indexOf('function renderHARCoverage')));
+console.log('PASS v7.1: UI, privacy preflight, standalone stage timeline, exports, no new permissions');

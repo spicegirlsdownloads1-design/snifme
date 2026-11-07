@@ -1,0 +1,15 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const p=x=>fs.readFileSync(x,'utf8');
+const manifest=JSON.parse(p('manifest.json'));
+assert.match(manifest.version,/^(?:4\.(?:[6-9]|[1-9]\d)\.\d+|5\.[0-9]\.0|6\.\d+\.\d+|7\.\d+\.\d+)$/);
+assert(p('devtools.html').includes('resource_decoder.js'));
+assert(p('devtools_autoscan.js').includes('THIResourceDecoder.decode'));
+assert(p('offline.html').includes('offline_inspector.js'));
+assert(p('offline.html').includes('scanner.js'));
+assert(p('popup.js').includes("'offline.html'"));
+assert(p('dashboard.js').includes("'offline.html'"));
+assert(!p('offline_ui.js').includes('chrome.runtime.sendMessage'));
+assert(!p('offline_inspector.js').includes('fetch('));
+assert(!p('offline_inspector.js').includes('localStorage'));
+console.log('PASS v4.5 wiring: offline inspector user triggered, no backend calls, bounded DevTools decoder');

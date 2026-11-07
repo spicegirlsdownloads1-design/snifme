@@ -1,0 +1,14 @@
+'use strict';const assert=require('node:assert/strict'),fs=require('node:fs');
+const m=require('../manifest.json');assert.equal(m.version,'7.19.0');
+for(const p of ['debugger','cookies','webRequestBlocking'])assert(!m.permissions.includes(p));
+const html=fs.readFileSync('dashboard.html','utf8'),ui=fs.readFileSync('dashboard.js','utf8');
+assert(html.includes('data-view="case-dossier"'));
+assert(html.includes('<script src="case_intel.js"></script><script src="case_crypto.js"></script><script src="case_compare.js"></script><script src="lab_acceptance.js"></script><script src="capture_repair.js"></script><script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(ui.includes('function renderCaseDossier(container)'));
+assert(ui.includes("case 'case-dossier':return caseDossier?.evidence||[];"));
+assert(ui.includes('const records=await loadGroupRecords(group);'));
+assert(ui.includes('THICase.pack(caseDossier)'));
+assert(ui.includes('THICaseCrypto.seal(envelope,phrase)'));
+assert(ui.includes('await THICase.verify(envelope)'));
+assert(fs.existsSync('RELEASE-v5.7.md'));
+console.log('PASS v5.8 wiring: case workspace, offline group reader, authenticated encryption, no new permissions');

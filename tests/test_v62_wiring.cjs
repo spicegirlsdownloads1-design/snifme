@@ -1,0 +1,16 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const manifest=require('../manifest.json');assert.equal(manifest.version,'7.19.0');
+assert(!manifest.permissions.some(x=>['debugger','cookies','webRequestBlocking'].includes(x)));
+const html=fs.readFileSync('dashboard.html','utf8'),ui=fs.readFileSync('dashboard.js','utf8');
+assert(html.includes('data-view="dam-review-matrix"'));
+assert(html.includes('<script src="dam_review_matrix.js"></script><script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(ui.includes('function renderDAMReviewMatrix(container)'));
+assert(ui.includes('THIDAMReview.evaluate(record)'));
+assert(ui.includes('THIDAMReview.pack(record)'));
+assert(ui.includes("case 'dam-review-matrix':return"));
+assert(ui.includes("if(view==='dam-review-matrix'){renderDAMReviewMatrix(container);return;}"));
+assert(ui.includes("'dam-review-matrix':['scope'"));
+for(const previous of ['dam-specialists','capture-repair','local-benchmark','case-compare','case-dossier','quality-ledger','upload-protocols','download-traces']) assert(html.includes('data-view="'+previous+'"'));
+assert(fs.existsSync('RELEASE-v6.1.md'));
+console.log('PASS v6.2 dashboard integration, export, existing workspaces and no new permissions');

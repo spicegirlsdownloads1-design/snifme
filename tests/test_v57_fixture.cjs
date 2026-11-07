@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+const ctx=vm.createContext({URL});ctx.globalThis=ctx;
+for(const name of ['dam_intel.js','dam_specialists.js'])vm.runInContext(fs.readFileSync(name,'utf8'),ctx);
+const r=ctx.THIDAMSpecialists.report(JSON.parse(fs.readFileSync('tests/dam_specialists_demo.json','utf8')));
+assert(r.profiles.some(p=>p.id==='bynder'&&p.confidence==='Strong indication'));
+assert(r.profiles.some(p=>p.id==='cloudinary'&&p.access.includes('authenticated')));
+assert(r.profiles.some(p=>p.id==='capture'));
+assert(r.profiles.some(p=>p.id==='resourcespace'&&p.confidence==='Weak clue'));
+console.log('PASS v5.7 fixture: passive offline DAM specialist report');

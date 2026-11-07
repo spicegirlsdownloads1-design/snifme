@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const dir=path.join(__dirname,'..');
+const m=require('../manifest.json');assert.equal(m.version,'7.19.0');
+for(const banned of ['cookies','debugger','webRequestBlocking'])assert(!m.permissions.includes(banned));
+const html=fs.readFileSync(path.join(dir,'dashboard.html'),'utf8'),js=fs.readFileSync(path.join(dir,'dashboard.js'),'utf8');
+assert(html.includes('<script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+for(const text of ['THIHARTriage.assess(r,answers)','Run offline coverage triage','trufflehog-har-triage.json','trufflehog-har-triage.csv','Same-site versus external-origin coverage','repeatedComparableKeys'])assert(js.includes(text),text);
+for(const name of ['evidence-synthesis','har-coverage','case-dossier','dam-specialists','upload-protocols','workflow-pattern'])assert(html.includes('data-view="'+name+'"'));
+console.log('PASS v6.8 triage dashboard wiring, privacy-safe exports, legacy views and no new permissions');

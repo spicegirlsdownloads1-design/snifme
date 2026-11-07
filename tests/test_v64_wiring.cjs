@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const manifest=require('../manifest.json');assert.equal(manifest.version,'7.19.0');
+for(const permission of ['debugger','cookies','webRequestBlocking'])assert(!manifest.permissions.includes(permission));
+const html=fs.readFileSync('dashboard.html','utf8'),js=fs.readFileSync('dashboard.js','utf8');
+assert(html.includes('data-view="compare-readiness"'));
+assert(html.includes('<script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(js.includes('function renderComparisonReadiness(container)'));
+assert(js.includes('THIComparisonReadiness.assess(ar,br,answers)'));
+assert(js.includes("if(view==='compare-readiness'){renderComparisonReadiness(container);return;}"));
+assert(js.includes("'compare-readiness':['category'"));
+assert(js.includes('Export readiness (redacted JSON)'));
+for(const v of ['dam-specialists','dam-review-matrix','policy-drift','case-dossier','case-compare','download-traces','quality-ledger','upload-protocols','capture-repair'])assert(html.includes('data-view="'+v+'"'));
+console.log('PASS v6.4 dashboard wiring, inherited modules and no new permissions');

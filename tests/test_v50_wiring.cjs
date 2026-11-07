@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const t=f=>fs.readFileSync(path.join(__dirname,'..',f),'utf8');
+assert.equal(JSON.parse(t('manifest.json')).version,'7.19.0');
+assert(t('dashboard.html').includes('data-view="acceptance"'));
+assert(t('dashboard.html').indexOf('acceptance_intel.js') < t('dashboard.html').indexOf('dashboard.js'));
+assert(t('background.js').includes('GET_ACCEPTANCE_REPORT'));
+assert(t('background.js').includes('THIAcceptance.evaluate'));
+assert(t('popup.js').includes("view=acceptance"));
+assert(t('dashboard.js').includes('renderAcceptance(container)'));
+assert(t('dashboard.js').includes('Export acceptance report (JSON)'));
+assert(!t('manifest.json').includes('"debugger"'));
+assert(!t('manifest.json').includes('"<all_urls>"'));
+console.log('PASS v5.0 manifest, view, popup, report export and permission wiring');

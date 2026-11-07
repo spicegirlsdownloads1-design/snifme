@@ -1,0 +1,13 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const root=path.resolve(__dirname,'..'),read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const manifest=JSON.parse(read('manifest.json'));
+assert.equal(manifest.version,'7.19.0');
+assert.deepEqual(manifest.permissions,['storage','tabs','scripting','webRequest','downloads','notifications']);
+const html=read('dashboard.html'),js=read('dashboard.js'),mod=read('har_image_negotiation.js');
+assert(html.includes('<script src="har_image_negotiation.js"></script>'));
+assert(html.indexOf('<script src="har_image_negotiation.js"></script>')<html.indexOf('<script src="dashboard.js"></script>'));
+for(const needle of ['THIHARImageNegotiation.audit(parsed)','THIHARImageNegotiation.compare(firstParsed,secondParsed,declared)','2g. Inspect image negotiation (offline)','Offline image formats & content negotiation','Offline image negotiation comparison','Export negotiation (redacted JSON)','Export negotiation comparison (redacted CSV)','imageNegotiationReport=null','harNegotiationComparison=null','inspectedFile!==file','reviewedSecondFile!==secondFile'])assert(js.includes(needle),needle);
+assert(js.indexOf('THIHARPrivacy.audit(firstParsed);THIHARPrivacy.audit(secondParsed)')<js.indexOf('THIHARImageNegotiation.compare(firstParsed,secondParsed,declared)'));
+assert(!/\bfetch\s*\(|XMLHttpRequest|chrome\.downloads\.download|chrome\.webRequest|\.send\s*\(/.test(mod));
+console.log('PASS v7.9 UI wiring: privacy gates, no additional permissions and no network operations');

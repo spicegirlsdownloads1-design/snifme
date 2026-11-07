@@ -1,0 +1,21 @@
+'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm'),crypto=require('node:crypto').webcrypto;
+const messages=[];let finish;const local=new Map();
+const storage={get:async k=>({[k]:local.get(k)}),set:async o=>{for(const [k,v]of Object.entries(o))local.set(k,v)}};
+const chrome={storage:{local:storage},devtools:{inspectedWindow:{tabId:8},network:{onRequestFinished:{addListener:f=>finish=f}}},runtime:{sendMessage:async m=>{messages.push(m);return m.type==='GET_AUTO_SCAN_PERMISSION'?{ok:true,enabled:true,startedAt:'2026-10-24T10:00:00Z'}:{ok:true};}}};
+const ctx=vm.createContext({chrome,URL,URLSearchParams,Promise,console,TextEncoder,crypto,setTimeout,clearTimeout});ctx.globalThis=ctx;
+for(const f of ['scanner.js','auto_scan_queue.js','resource_decoder.js','secret_fingerprints.js','devtools_autoscan.js'])vm.runInContext(fs.readFileSync(f,'utf8'),ctx,{filename:f});
+const token='ghp_ABCDEFGHIJKLMNOPQRSTUVWXZYabcdefghijklmnop';
+const text='// safe\nconst a="'+token+'";';
+const request={request:{url:'https://static.example/app.js?token=PRIVATE',method:'GET'},response:{status:200,content:{mimeType:'application/javascript',size:text.length}},getContent:cb=>cb(text,'')};
+(async()=>{
+ finish(request);
+ for(let i=0;i<30&&!messages.find(m=>m.type==='AUTO_RESOURCE_SCAN');i++)await new Promise(r=>setTimeout(r,35));
+ const report=messages.find(m=>m.type==='AUTO_RESOURCE_SCAN');assert(report,JSON.stringify(messages));
+ const finding=report.payload.findings[0];
+ assert.match(finding.fingerprint,/^[a-f0-9]{64}$/);assert.match(finding.fingerprintKeyId,/^[a-f0-9]{16}$/);
+ assert.equal(finding.line,2);assert(finding.column>0);assert.equal(report.payload.url,'https://static.example/app.js');
+ assert(!JSON.stringify(report).includes(token));assert(!JSON.stringify(report).includes('PRIVATE'));
+ assert([...local.keys()].some(k=>k.includes('fingerprint-key')));
+ console.log('PASS v4.6 DevTools: only locally keyed redacted findings leave the inspector');
+})().catch(e=>{console.error(e);process.exitCode=1});

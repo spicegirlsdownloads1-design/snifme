@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict'),p=require('node:path');
+const base=p.resolve(__dirname,'..');const t=f=>fs.readFileSync(p.join(base,f),'utf8');
+const m=JSON.parse(t('manifest.json'));
+assert.equal(m.version,'7.19.0');
+for(const x of ['debugger','webRequestBlocking','cookies'])assert(!m.permissions.includes(x));
+const html=t('dashboard.html'),script=t('dashboard.js'),compare=t('har_stage_compare.js');
+assert(html.includes('<script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script>'));
+for(const s of ['Observed service-role distribution','Service role × observed stage','Nearby cross-role observations','Export service-role comparison (redacted CSV)','trufflehog-har-role-flow-compare.csv'])assert(script.includes(s),s);
+for(const s of ['const ra=ROLES.audit(first),rb=ROLES.audit(second);','roleStageRows','handoffRows'])assert(compare.includes(s),s);
+assert(script.includes('if(inspectedFile!==firstFile)'));
+assert(script.includes('if(reviewedSecondFile!==secondFile)'));
+assert(script.includes('THIHARPrivacy.audit(firstParsed);THIHARPrivacy.audit(secondParsed)'));
+console.log('PASS v7.3: script dependencies, gating, UI and redacted exports, permission preservation');

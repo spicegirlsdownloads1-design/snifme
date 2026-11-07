@@ -1,0 +1,12 @@
+'use strict';const assert=require('node:assert/strict'),fs=require('node:fs');
+const manifest=require('../manifest.json');assert.equal(manifest.version,'7.19.0');
+assert(!manifest.permissions.some(x=>['debugger','cookies','webRequestBlocking'].includes(x)));
+const h=fs.readFileSync('dashboard.html','utf8'),d=fs.readFileSync('dashboard.js','utf8');
+assert(h.includes('data-view="policy-drift"'));
+assert(h.includes('<script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script><script src="dam_policy_compare.js"></script><script src="evidence_synthesis.js"></script><script src="har_privacy.js"></script><script src="har_dam_workflows.js"></script><script src="har_sequence.js"></script><script src="har_role_flow.js"></script><script src="har_stage_compare.js"></script><script src="har_coverage.js"></script><script src="har_triage.js"></script><script src="har_delivery_posture.js"></script><script src="har_access_matrix.js"></script><script src="har_redirect_boundaries.js"></script><script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+assert(d.includes('function renderPolicyDrift(container)'));
+assert(d.includes('THIPolicyDrift.compare(ar,br)'));
+assert(d.includes("if(view==='policy-drift'){renderPolicyDrift(container);return;}"));
+assert(d.includes("'policy-drift':['category'"));
+for(const v of ['dam-review-matrix','dam-specialists','case-dossier','capture-repair','quality-ledger','download-traces'])assert(h.includes('data-view="'+v+'"'));
+console.log('PASS v6.3 extension wiring, inherited workspaces, permissions and exports');

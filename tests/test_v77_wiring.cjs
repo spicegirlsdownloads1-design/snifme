@@ -1,0 +1,10 @@
+'use strict';
+const assert=require('node:assert/strict');const fs=require('node:fs');const path=require('node:path');
+const root=path.resolve(__dirname,'..');const read=f=>fs.readFileSync(path.join(root,f),'utf8');
+const html=read('dashboard.html'),js=read('dashboard.js'),mod=read('har_range_evidence.js');
+assert(html.includes('<script src="har_range_evidence.js"></script><script src="dashboard.js"></script>'));
+for(const x of ['THIHARRangeEvidence.audit(parsed)','THIHARRangeEvidence.compare(firstParsed,secondParsed,declared)','2e. Inspect byte-range evidence (offline)','Offline byte-range and transfer evidence','Offline byte-range evidence comparison','Export byte-range evidence (redacted JSON)','Export byte-range comparison (redacted CSV)','inspectedFile!==file','reviewedSecondFile!==secondFile'])assert(js.includes(x),x);
+assert(js.indexOf('THIHARPrivacy.audit(firstParsed);THIHARPrivacy.audit(secondParsed)')<js.indexOf('THIHARRangeEvidence.compare(firstParsed,secondParsed,declared)'));
+assert(!/\bfetch\s*\(|XMLHttpRequest|chrome\.downloads\.download|chrome\.webRequest/.test(mod));
+assert.equal(JSON.parse(read('manifest.json')).version,'7.19.0');
+console.log('PASS v7.7: offline UI, privacy gates, no network operations, manifest');

@@ -1,0 +1,11 @@
+const assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
+const read=x=>fs.readFileSync(path.join(__dirname,'..',x),'utf8');
+assert.equal(JSON.parse(read('manifest.json')).version,'7.19.0');
+for(const src of ['frame_worker_intel.js','site_relationships.js'])assert(read('background.js').includes(src));
+assert(read('dashboard.html').includes('data-view="frames-workers"'));
+assert(read('dashboard.html').includes('data-view="site-relations"'));
+assert(read('background.js').includes('CROSS_SITE_HOST_RELATIONS'));
+assert(read('background.js').includes('THIContexts.clean(raw,rec.origin)'));
+assert(read('content.js').includes('payload.embeddedContexts'));
+assert(!read('manifest.json').includes('"debugger"'));
+console.log('PASS v4.7 wiring, no new debugger permissions');

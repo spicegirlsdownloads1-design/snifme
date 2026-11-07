@@ -1,0 +1,13 @@
+ 'use strict';
+const assert=require('node:assert/strict'),fs=require('node:fs');
+const manifest=require('../manifest.json');assert.equal(manifest.version,'7.19.0');
+assert(!manifest.permissions.some(x=>['debugger','cookies','webRequestBlocking'].includes(x)));
+const html=fs.readFileSync('dashboard.html','utf8'),ui=fs.readFileSync('dashboard.js','utf8');
+assert(html.includes('data-view="workflow-pattern"'));
+assert(html.includes('<script src="workflow_pattern.js"></script><script src="comparison_readiness.js"></script>'));
+assert(ui.includes('function renderWorkflowPattern(container)'));
+assert(ui.includes('THIWorkflowPattern.compare(ar,br)'));
+assert(ui.includes("if(view==='workflow-pattern'){renderWorkflowPattern(container);return;}"));
+assert(ui.includes("'workflow-pattern':['category'"));
+for(const v of ['compare-readiness','policy-drift','dam-specialists','upload-protocols','case-dossier','download-traces'])assert(html.includes('data-view="'+v+'"'));
+console.log('PASS v6.5 dashboard wiring, inherited views and no additional Chrome permissions');
