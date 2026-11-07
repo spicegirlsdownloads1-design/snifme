@@ -1,4 +1,16 @@
 Trufflehog Intelligence v7.19.0 — independent offline verification
+
+PASSIVE SECRET-EXPOSURE REVIEW BRANCH — 2026-11-07
+PASS: 103/108 Node test files.
+PASS: focused JS/HTML/JSON/header/redirect/HAR detector and raw-value redaction.
+PASS: v7.18 live worker security integration and security-intelligence regression.
+UNRUNNABLE FROM THE COMMITTED v7.19 BASELINE: 5 tests reference files that are
+not present in either GitHub main or the supplied v7.19 ZIP:
+- tests/quality_lab.py
+- tests/protocol_lab.py
+- tests/dam_specialists_demo.json
+- tests/fake_indexeddb_v719.js (required by two tests)
+No detector regression failed among the 103 runnable Node tests.
 Date: 2026-11-07
 
 PASS: 177/177 Node test files, including v7.19 capture-journal replay and
